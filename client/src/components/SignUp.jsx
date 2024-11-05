@@ -1,14 +1,63 @@
-import { Box, Button, Input, VStack, Text, FormControl, FormLabel, Link } from '@chakra-ui/react';
-import { Link as RouterLink } from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { Box, Button, Input, VStack, Text, FormControl, FormLabel, Link, Alert, AlertIcon } from '@chakra-ui/react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { AuthContext } from '../context/AuthContext';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function SignUp() {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!username || !email || !password) {
+      setError('Please fill in all fields.');
+      return;
+    }
+
+    setError(null); // Reset error
+    setLoading(true); // Set loading state
+
+    try {
+      const response = await axios.post(`${API_URL}/api/signup`, {
+        username,
+        email,
+        password,
+      });
+
+      if (response.data.message === 'User created successfully') {
+        // Immediately log in the user after signup
+        const loginResponse = await axios.post(`${API_URL}/api/login`, { email, password });
+        if (loginResponse.data.success) {
+          login(loginResponse.data.token);
+          navigate('/'); // Redirect to the home page or another route
+        }
+      } else {
+        setError(response.data.message || 'Signup failed.');
+      }
+    } catch (error) {
+      setError(error.response?.data?.message || 'Error signing up.');
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  };
+
   return (
     <VStack
       spacing={8}
       align="center"
       justify="center"
       p={10}
-      bgImage="url('/basketball.png')" 
+      bgImage="url('/basketball.png')"
       bgSize="contain"
       bgPosition="center"
       bgRepeat="no-repeat"
@@ -17,7 +66,7 @@ function SignUp() {
       <Box
         bgColor="#2C2C2C"
         bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
-        bgSize="5px 5px;"
+        bgSize="5px 5px"
         borderRadius="12px"
         p={8}
         w="300px"
@@ -33,6 +82,13 @@ function SignUp() {
           Sign Up
         </Text>
 
+        {error && (
+          <Alert status="error" mt={4}>
+            <AlertIcon />
+            {error}
+          </Alert>
+        )}
+
         <FormControl mt={6}>
           <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Full Name</FormLabel>
           <Input
@@ -45,6 +101,9 @@ function SignUp() {
             bg="transparent"
             borderRadius="8px"
             p={4}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required // HTML5 validation
           />
         </FormControl>
 
@@ -61,6 +120,9 @@ function SignUp() {
             bg="transparent"
             borderRadius="8px"
             p={4}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required // HTML5 validation
           />
         </FormControl>
 
@@ -77,6 +139,9 @@ function SignUp() {
             bg="transparent"
             borderRadius="8px"
             p={4}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required // HTML5 validation
           />
         </FormControl>
 
@@ -97,6 +162,9 @@ function SignUp() {
             color: 'white',
             transform: 'scale(1.05)',
           }}
+          onClick={handleSignup}
+          isLoading={loading} // Loading state for button
+          loadingText="Creating..." // Loading text
         >
           Create Account
         </Button>
