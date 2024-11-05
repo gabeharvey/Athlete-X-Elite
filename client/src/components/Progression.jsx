@@ -85,7 +85,7 @@ function Progression() {
             mb={4}
           />
           <Text color="#FFFDD0" fontFamily="'Changa', cursive">
-            After dedicated effort, we showcase their improvement, ready for recruiters and scouts.
+            After dedicated effort, we showcase athlete improvement, ready to present to recruiters and scouts.
           </Text>
         </Box>
       </Stack>
