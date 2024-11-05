@@ -22,8 +22,8 @@ function SignUp() {
       return;
     }
 
-    setError(null); 
-    setLoading(true); 
+    setError(null);
+    setLoading(true);
 
     try {
       const response = await axios.post(`${API_URL}/api/signup`, {
@@ -32,11 +32,14 @@ function SignUp() {
         password,
       });
 
-      if (response.data.message === 'User created successfully') {
-        // Changed to use username and password for login
-        const loginResponse = await axios.post(`${API_URL}/api/login`, { username, password });
+      if (response.status === 201) {
+        const loginResponse = await axios.post(`${API_URL}/api/login`, {
+          email, 
+          password,
+        });
+
         if (loginResponse.data.success) {
-          login(loginResponse.data.token);
+          login(loginResponse.data.token); 
           navigate('/'); 
         }
       } else {
