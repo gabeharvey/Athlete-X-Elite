@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-// import SignUp from './components/SignUp'; // Uncomment if needed in the future
+// import SignUp from './components/SignUp'; 
 
 const theme = extendTheme({
   styles: {
@@ -34,4 +34,3 @@ function App() {
 }
 
 export default App;
-

@@ -17,15 +17,13 @@ function SignUp() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-
-    // Basic validation
     if (!username || !email || !password) {
       setError('Please fill in all fields.');
       return;
     }
 
-    setError(null); // Reset error
-    setLoading(true); // Set loading state
+    setError(null); 
+    setLoading(true); 
 
     try {
       const response = await axios.post(`${API_URL}/api/signup`, {
@@ -35,11 +33,11 @@ function SignUp() {
       });
 
       if (response.data.message === 'User created successfully') {
-        // Immediately log in the user after signup
-        const loginResponse = await axios.post(`${API_URL}/api/login`, { email, password });
+        // Changed to use username and password for login
+        const loginResponse = await axios.post(`${API_URL}/api/login`, { username, password });
         if (loginResponse.data.success) {
           login(loginResponse.data.token);
-          navigate('/'); // Redirect to the home page or another route
+          navigate('/'); 
         }
       } else {
         setError(response.data.message || 'Signup failed.');
@@ -47,7 +45,7 @@ function SignUp() {
     } catch (error) {
       setError(error.response?.data?.message || 'Error signing up.');
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false); 
     }
   };
 
@@ -103,7 +101,7 @@ function SignUp() {
             p={4}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            required // HTML5 validation
+            required 
           />
         </FormControl>
 
@@ -122,7 +120,7 @@ function SignUp() {
             p={4}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required // HTML5 validation
+            required 
           />
         </FormControl>
 
@@ -141,7 +139,7 @@ function SignUp() {
             p={4}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required // HTML5 validation
+            required 
           />
         </FormControl>
 
@@ -163,8 +161,8 @@ function SignUp() {
             transform: 'scale(1.05)',
           }}
           onClick={handleSignup}
-          isLoading={loading} // Loading state for button
-          loadingText="Creating..." // Loading text
+          isLoading={loading} 
+          loadingText="Creating..." 
         >
           Create Account
         </Button>
