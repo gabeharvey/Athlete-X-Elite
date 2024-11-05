@@ -1,0 +1,24 @@
+{
+    "name": "athlete-x-elite",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
+        "start:server": "cd server && npm start",
+        "start:client": "cd client && npm run dev",
+        "develop": "concurrently \"cd server && npm run watch\" \"cd client && npm start\"",
+        "install": "cd server && npm i && cd ../client && npm i",
+        "build": "cd client && npm run build",
+        "render-build": "npm install && npm run build && npm run seed"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "concurrently": "^8.0.0"
+    },
+    "dependencies": {
+        "mongodb": "^6.8.0"
+    }
+}
