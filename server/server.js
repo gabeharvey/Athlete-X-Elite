@@ -22,7 +22,7 @@ const __dirname = path.dirname(__filename);
 
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://athlete-x-elite.onrender.com',
+  'https://AthleteXElite.onrender.com',
 ];
 
 app.use(cors({
