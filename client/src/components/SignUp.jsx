@@ -12,7 +12,7 @@ function SignUp() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { login } = useContext(AuthContext);
+  const { login } = useContext(AuthContext); 
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -22,10 +22,23 @@ function SignUp() {
       return;
     }
 
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isValidEmail) {
+      setError('Please enter a valid email.');
+      return;
+    }
+
+    const isValidPassword = password.length >= 8;
+    if (!isValidPassword) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
     try {
+      // Sign up the user
       const response = await axios.post(`${API_URL}/api/signup`, {
         username,
         email,
@@ -33,22 +46,32 @@ function SignUp() {
       });
 
       if (response.status === 201) {
-        const loginResponse = await axios.post(`${API_URL}/api/login`, {
-          email, 
-          password,
-        });
+        // Once the user is signed up, login automatically
+        const loginResponse = await axios.post(`${API_URL}/api/login`, { email, password });
 
-        if (loginResponse.data.success) {
-          login(loginResponse.data.token); 
-          navigate('/'); 
+        if (loginResponse.data.token) {
+          // Store the token using context or localStorage
+          login(loginResponse.data.token);
+
+          // Optionally, set token to localStorage for persistence
+          localStorage.setItem('authToken', loginResponse.data.token);
+
+          // You can now pass this token in the Authorization header for subsequent requests
+          axios.defaults.headers['Authorization'] = `Bearer ${loginResponse.data.token}`;
+
+          // Redirect to the home page after successful signup and login
+          navigate('/');
+        } else {
+          setError('Login failed, please try again.');
         }
       } else {
         setError(response.data.message || 'Signup failed.');
       }
     } catch (error) {
+      // Handling potential errors
       setError(error.response?.data?.message || 'Error signing up.');
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -147,7 +170,7 @@ function SignUp() {
         </FormControl>
 
         <Button
-          mt={6}
+          mt={8}
           fontFamily="'Tilt Prism', sans-serif"
           fontWeight="bold"
           bg="transparent"
@@ -163,16 +186,16 @@ function SignUp() {
             color: 'white',
             transform: 'scale(1.05)',
           }}
+          isLoading={loading}
+          loadingText="Signing Up..."
           onClick={handleSignup}
-          isLoading={loading} 
-          loadingText="Creating..." 
         >
-          Create Account
+          Sign Up
         </Button>
 
-        <Text mt={4} color="#FFFDD0" fontFamily="'Changa', cursive">
-          Already a member?{' '}
-          <Link as={RouterLink} to="/login" color="#FFA500" fontWeight="bold" _hover={{ textDecoration: 'underline' }}>
+        <Text mt={4} color="#FFFDD0">
+          Already have an account?{' '}
+          <Link as={RouterLink} to="/login" color="#FFA500">
             Log In
           </Link>
         </Text>

@@ -8,49 +8,57 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const isValidTokenFormat = (token) => {
+    try {
+      const decoded = jwtDecode(token);
+      return decoded.exp > Date.now() / 1000; 
+    } catch (error) {
+      console.error('Invalid token format or decoding failed:', error.message);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const verifyToken = async () => {
       const token = localStorage.getItem('authToken');
-      console.log('Retrieved token:', token); 
-      
-      if (token) {
-        try {
-          const isValidTokenFormat = token.split('.').length === 3;
-          if (!isValidTokenFormat) {
-            throw new Error('Invalid token format');
-          }
+      console.log('Retrieved token:', token);
 
-          console.log('Token before API call:', token);
-          const apiUrl = import.meta.env.VITE_API_URL;
-          const response = await fetch(`${apiUrl}/api/verify-token`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ token }),
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data.valid) {
-              setIsAuthenticated(true);
-              try {
+      if (token) {
+        const isValid = isValidTokenFormat(token);
+        if (isValid) {
+          try {
+            const apiUrl = import.meta.env.VITE_API_URL;
+            const response = await fetch(`${apiUrl}/api/verify-token`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ token }), 
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.valid) { 
+                setIsAuthenticated(true);
                 const decoded = jwtDecode(token);
                 setUser(decoded);
-              } catch (error) {
-                console.error('Failed to decode token:', error.message);
+              } else {
+                console.warn('Token is invalid according to the server');
                 setIsAuthenticated(false);
                 localStorage.removeItem('authToken');
               }
             } else {
-              console.warn('Token is invalid according to the server');
-              setIsAuthenticated(false);
-              localStorage.removeItem('authToken');
+              console.error('Server error during token verification:', response.statusText);
+              throw new Error('Failed to verify token with the server');
             }
-          } else {
-            throw new Error('Failed to verify token with the server');
+          } catch (error) {
+            console.error('Token verification failed:', error.message);
+            setIsAuthenticated(false);
+            localStorage.removeItem('authToken');
           }
-        } catch (error) {
-          console.error('Token verification failed:', error.message);
+        } else {
+          console.warn('Invalid token format');
           setIsAuthenticated(false);
           localStorage.removeItem('authToken');
         }
@@ -62,10 +70,12 @@ export const AuthProvider = ({ children }) => {
     };
 
     verifyToken();
+
+    return () => setLoading(false);
   }, []);
+
   const login = (token) => {
-    const isValidTokenFormat = token.split('.').length === 3;
-    if (!isValidTokenFormat) {
+    if (!isValidTokenFormat(token)) {
       console.error('Invalid token format');
       return;
     }

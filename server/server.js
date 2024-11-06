@@ -49,28 +49,23 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x
   .catch(err => console.error('MongoDB connection error:', err));
 
 const authenticateJWT = (req, res, next) => {
-    const authHeader = req.headers['authorization']; 
-    console.log('Auth Header:', authHeader); 
-    
-    const token = authHeader && authHeader.split(' ')[1]; 
-    console.log('Retrieved token:', token); 
-  
-    if (!token) return res.sendStatus(401); 
-  
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-      if (err) {
-        if (err.name === 'TokenExpiredError') {
-          return res.status(401).json({ message: 'Token expired' });
-        }
-        if (err.name === 'JsonWebTokenError') {
-          return res.status(401).json({ message: 'Invalid token' });
-        }
-        return res.status(401).json({ message: 'Token verification failed' });
-      }
-      req.user = user;
-      next();
-    });
-  };  
+  const authHeader = req.headers['authorization']; 
+  console.log('Auth Header:', authHeader); 
+
+  const token = authHeader && authHeader.split(' ')[1]; 
+  console.log('Retrieved token:', token); 
+
+  if (!token) return res.status(401).json({ valid: false, message: 'Token missing' });
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      console.error('Token verification error:', err);
+      return res.status(401).json({ valid: false, message: err.message || 'Token verification failed' });
+    }
+    req.user = user;
+    next();
+  });
+};
 
 app.post('/api/payment', async (req, res) => {
   const { amount, id } = req.body;
@@ -103,7 +98,7 @@ app.post('/api/payment', async (req, res) => {
 
 app.post('/api/signup', async (req, res) => {
   const { username, email, password } = req.body;
-  
+
   try {
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
@@ -156,7 +151,7 @@ app.post('/api/verify-token', (req, res) => {
   const token = req.headers['authorization']?.split(' ')[1]; 
 
   if (!token) {
-    return res.status(400).json({ valid: false, message: 'Token missing' });
+    return res.status(401).json({ valid: false, message: 'Token missing' });
   }
 
   jwt.verify(token, JWT_SECRET, (err, decoded) => {
