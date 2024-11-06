@@ -1,9 +1,14 @@
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { Outlet } from 'react-router-dom';
-import { AuthProvider } from './context/AuthProvider';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-// import SignUp from './components/SignUp'; 
+import './App.css';
+import { ApolloClient, InMemoryCache, ApolloProvider, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+import Navbar from '/src/components/Navbar.jsx';
+import Footer from '/src/components/Footer.jsx';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import { extendTheme } from '@chakra-ui/react';
 
 const theme = extendTheme({
   styles: {
@@ -19,17 +24,36 @@ const theme = extendTheme({
   },
 });
 
+const httpLink = createHttpLink({
+  uri: '/graphql',
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('id_token');
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache(),
+});
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY); 
+
 function App() {
   return (
-    <ChakraProvider theme={theme}>
-      <AuthProvider>
-        <Navbar /> 
-        <main>
-          <Outlet /> 
-        </main>
-        <Footer /> 
-      </AuthProvider>
-    </ChakraProvider>
+    <ApolloProvider client={client} theme={theme}>
+      <Elements stripe={stripePromise}>
+        <Navbar />
+        <Outlet />
+        <Footer />
+      </Elements>
+    </ApolloProvider>
   );
 }
 

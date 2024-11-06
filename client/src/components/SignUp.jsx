@@ -11,7 +11,7 @@ function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const { login } = useContext(AuthContext);  // Access the login function from AuthContext
+  const { login } = useContext(AuthContext); 
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
@@ -36,7 +36,6 @@ function SignUp() {
     setError(null);
 
     try {
-      // Send signup request
       const response = await axios.post(`${API_URL}/api/signup`, {
         username,
         email,
@@ -46,10 +45,10 @@ function SignUp() {
       const { token, message } = response.data;
 
       if (message === 'User created successfully') {
-        // Immediately log the user in by updating the context
-        login(token);  // This will update the authentication state
+        
+        login(token); 
 
-        navigate('/'); // Redirect to the homepage or another protected route
+        navigate('/');
       } else {
         setError(message || 'Signup failed');
       }
