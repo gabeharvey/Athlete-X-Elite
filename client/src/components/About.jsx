@@ -28,17 +28,17 @@ function About() {
           Click & Learn More!
         </button>
       )}
-      <h1 className={isVisible ? 'zoom-in' : ''}>
-        Welcome to <span className="tilt-prism">Athlete X Elite</span>! You have done all the hard work and sacrifice. Allow us to present your Elite Athlete to the world!
+      <h1 className={isVisible ? 'zoom-in' : ''} color="#FFFDD0">
+        Welcome to <span className="tilt-prism" color="#FFFDD0">Athlete X Elite</span>! You have done all the hard work and sacrifice. Allow us to present your Elite Athlete to the world!
       </h1>
       <div className="fancy-divider"></div>
-      <h2 className={isH2Visible ? 'zoom-in' : ''}>
+      <h2 className={isH2Visible ? 'zoom-in' : ''} color="#FFFDD0">
         Mobile friendly, yet responsive app showcasing athletic abilities.
       </h2>
       <div className="fancy-divider"></div>
       {isH3Visible && (
         <div className="zoom-in">
-          <h3>
+          <h3 color="#FFFDD0">
             It is crucial to stand out! The talent and skills are there. People want to see it quickly and First Class!
           </h3>
         </div>
