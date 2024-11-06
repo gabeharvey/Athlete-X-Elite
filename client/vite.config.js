@@ -11,5 +11,5 @@ export default defineConfig({
       '/api': 'http://localhost:5000', 
     },
   },
-  base: '/',  // Set the base path if needed for production (e.g., '/your-app/')
+  base: '/', 
 });
