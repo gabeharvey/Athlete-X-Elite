@@ -33,6 +33,7 @@ const theme = extendTheme({
     global: {
       body: {
         backgroundColor: "black",
+        color: "#FFFDD0",
       },
     },
   },
