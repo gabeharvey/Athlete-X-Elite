@@ -65,10 +65,10 @@ const ShoppingCart = () => {
             <Image
               src={item.image}
               alt={item.name}
-              borderRadius="12px"
+              borderRadius="5px"
               objectFit="cover"
-              width="100px"
-              height="150px"
+              width="150px"
+              height="50px"
             />
             <Text fontSize="xl" fontWeight="bold" color="#FFFDD0" ml={4}>
               {item.name}

@@ -29,7 +29,7 @@ const Checkout = () => {
         as="h1"
         size="2xl"
         mb="1.5rem"
-        fontFamily="'Satisfy', cursive"
+        fontFamily="'Changa', cursive"
         color="#FFFDD0"
         fontWeight="900"
         textAlign="center"

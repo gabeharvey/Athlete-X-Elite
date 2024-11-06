@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import jwtDecode from 'jwt-decode';
-import { AuthContext } from './AuthContext'; // Adjust the import based on your structure
+import { AuthContext } from './AuthContext'; 
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,7 +21,6 @@ export const AuthProvider = ({ children }) => {
           }
 
           console.log('Token before API call:', token);
-
           const apiUrl = import.meta.env.VITE_API_URL;
           const response = await fetch(`${apiUrl}/api/verify-token`, {
             method: 'POST',
@@ -30,7 +29,6 @@ export const AuthProvider = ({ children }) => {
             },
             body: JSON.stringify({ token }),
           });
-
           if (response.ok) {
             const data = await response.json();
             if (data.valid) {
@@ -44,12 +42,12 @@ export const AuthProvider = ({ children }) => {
                 localStorage.removeItem('authToken');
               }
             } else {
-              console.warn('Token is not valid according to server');
+              console.warn('Token is invalid according to the server');
               setIsAuthenticated(false);
               localStorage.removeItem('authToken');
             }
           } else {
-            throw new Error('Failed to verify token');
+            throw new Error('Failed to verify token with the server');
           }
         } catch (error) {
           console.error('Token verification failed:', error.message);
@@ -59,12 +57,12 @@ export const AuthProvider = ({ children }) => {
       } else {
         setIsAuthenticated(false);
       }
+
       setLoading(false);
     };
 
     verifyToken();
   }, []);
-
   const login = (token) => {
     const isValidTokenFormat = token.split('.').length === 3;
     if (!isValidTokenFormat) {
@@ -72,13 +70,13 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    localStorage.setItem('authToken', token);
-    setIsAuthenticated(true);
     try {
+      localStorage.setItem('authToken', token);
       const decoded = jwtDecode(token);
       setUser(decoded);
+      setIsAuthenticated(true);
     } catch (error) {
-      console.error('Failed to decode token:', error.message);
+      console.error('Failed to decode token during login:', error.message);
       setIsAuthenticated(false);
       localStorage.removeItem('authToken');
     }

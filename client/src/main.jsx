@@ -22,6 +22,8 @@ import Weightlifting from './components/Weightlifting.jsx';
 import Swimming from './components/Swimming.jsx';
 import Soccer from './components/Soccer.jsx';
 import Elite from './components/Elite.jsx';
+import ShoppingCart from './components/ShoppingCart.jsx';
+import Checkout from './components/Checkout.jsx';
 
 const theme = extendTheme({
   styles: {
@@ -57,6 +59,8 @@ const router = createBrowserRouter([
       { path: 'swimming', element: <Swimming /> },
       { path: 'soccer', element: <Soccer /> },
       { path: 'elite', element: <Elite /> },
+      { path: 'cart', element: <ShoppingCart /> },
+      { path: 'checkout', element: <Checkout /> },
     ],
   },
 ]);

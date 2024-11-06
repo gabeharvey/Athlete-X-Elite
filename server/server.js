@@ -49,15 +49,28 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x
   .catch(err => console.error('MongoDB connection error:', err));
 
 const authenticateJWT = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.sendStatus(401);
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-};
+    const authHeader = req.headers['authorization']; 
+    console.log('Auth Header:', authHeader); 
+    
+    const token = authHeader && authHeader.split(' ')[1]; 
+    console.log('Retrieved token:', token); 
+  
+    if (!token) return res.sendStatus(401); 
+  
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (err) {
+        if (err.name === 'TokenExpiredError') {
+          return res.status(401).json({ message: 'Token expired' });
+        }
+        if (err.name === 'JsonWebTokenError') {
+          return res.status(401).json({ message: 'Invalid token' });
+        }
+        return res.status(401).json({ message: 'Token verification failed' });
+      }
+      req.user = user;
+      next();
+    });
+  };  
 
 app.post('/api/payment', async (req, res) => {
   const { amount, id } = req.body;
@@ -79,11 +92,11 @@ app.post('/api/payment', async (req, res) => {
     res.json({ message: 'Payment successful', success: true });
   } catch (error) {
     console.error('Payment error:', error);
-    res.status(500).json({ 
-      message: 'Payment failed', 
-      success: false, 
-      error: error.type, 
-      detail: error.raw ? error.raw.message : error.message 
+    res.status(500).json({
+      message: 'Payment failed',
+      success: false,
+      error: error.type,
+      detail: error.raw ? error.raw.message : error.message,
     });
   }
 });
@@ -114,50 +127,45 @@ app.post('/api/signup', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-    const { email, password } = req.body; 
-  
-    try {
-      if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
-      }
-  
-      const user = await User.findOne({ email }); 
-      if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-  
-      const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-      res.status(200).json({ message: 'Login successful', token, success: true });
-    } catch (error) {
-      console.error('Error logging in:', error);
-      res.status(500).json({ message: 'Error logging in', error: error.message });
-    }
-  });  
-
-app.post('/api/verify-token', (req, res) => {
-  const { token } = req.body;
+  const { email, password } = req.body;
 
   try {
-    if (!token) {
-      return res.status(400).json({ valid: false });
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-      if (err) {
-        console.error('Token verification error:', err);
-        return res.status(401).json({ valid: false });
-      }
-      res.json({ valid: true, decoded });
-    });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    const token = jwt.sign({ id: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    res.status(200).json({ message: 'Login successful', token, success: true });
   } catch (error) {
-    console.error('Error verifying token:', error);
-    res.status(500).json({ valid: false });
+    console.error('Error logging in:', error);
+    res.status(500).json({ message: 'Error logging in', error: error.message });
   }
+});
+
+app.post('/api/verify-token', (req, res) => {
+  const token = req.headers['authorization']?.split(' ')[1]; 
+
+  if (!token) {
+    return res.status(400).json({ valid: false, message: 'Token missing' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      console.error('Token verification error:', err);
+      return res.status(401).json({ valid: false, message: 'Invalid or expired token' });
+    }
+    res.json({ valid: true, decoded });
+  });
 });
 
 app.get('/api/protected', authenticateJWT, (req, res) => {
