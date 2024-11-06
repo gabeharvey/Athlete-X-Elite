@@ -21,58 +21,52 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const verifyToken = async () => {
       const token = localStorage.getItem('authToken');
-      console.log('Retrieved token:', token);
 
-      if (token) {
-        const isValid = isValidTokenFormat(token);
-        if (isValid) {
-          try {
-            const apiUrl = import.meta.env.VITE_API_URL;
-            const response = await fetch(`${apiUrl}/api/verify-token`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ token }), 
-            });
+      if (token && isValidTokenFormat(token)) {
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL;
+          const response = await fetch(`${apiUrl}/api/verify-token`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ token }), 
+          });
 
-            if (response.ok) {
-              const data = await response.json();
-              if (data && data.valid) { 
-                setIsAuthenticated(true);
-                const decoded = jwtDecode(token);
-                setUser(decoded);
-              } else {
-                console.warn('Token is invalid according to the server');
-                setIsAuthenticated(false);
-                localStorage.removeItem('authToken');
-              }
+          if (response.ok) {
+            const data = await response.json();
+            if (data.valid) { 
+              setIsAuthenticated(true);
+              const decoded = jwtDecode(token);
+              setUser(decoded);
             } else {
-              console.error('Server error during token verification:', response.statusText);
-              throw new Error('Failed to verify token with the server');
+              setIsAuthenticated(false);
+              setUser(null); 
+              localStorage.removeItem('authToken');
             }
-          } catch (error) {
-            console.error('Token verification failed:', error.message);
+          } else {
+            console.error('Server error during token verification:', response.statusText);
             setIsAuthenticated(false);
+            setUser(null); 
             localStorage.removeItem('authToken');
           }
-        } else {
-          console.warn('Invalid token format');
+        } catch (error) {
+          console.error('Token verification failed:', error.message);
           setIsAuthenticated(false);
+          setUser(null); 
           localStorage.removeItem('authToken');
         }
       } else {
         setIsAuthenticated(false);
+        setUser(null);
       }
 
-      setLoading(false);
+      setLoading(false); 
     };
 
-    verifyToken();
-
-    return () => setLoading(false);
-  }, []);
+    verifyToken(); 
+  }, []); 
 
   const login = (token) => {
     if (!isValidTokenFormat(token)) {
@@ -88,6 +82,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to decode token during login:', error.message);
       setIsAuthenticated(false);
+      setUser(null); 
       localStorage.removeItem('authToken');
     }
   };
