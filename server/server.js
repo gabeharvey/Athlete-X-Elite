@@ -145,7 +145,7 @@ app.get('/api/protected', authenticateJWT, (req, res) => {
 
 // Serve the index.html file for all non-API routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+  res.sendFile(path.resolve(__dirname, '..', 'client', 'build', 'index.html'));
 });
 
 // Serve favicon
