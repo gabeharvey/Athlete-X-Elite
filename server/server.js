@@ -21,7 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const allowedOrigins = [
-  'http://localhost:5173', 
+  'http://localhost:5173',
   'https://athletexelite.onrender.com',
 ];
 
@@ -42,8 +42,10 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 
-app.use(express.static(path.join(__dirname, 'build')));
+// Serve static files from the React app (located in client/build)
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
+// Mongoose connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x-elite', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -51,6 +53,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+// Authentication middleware
 const authenticateJWT = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -62,6 +65,7 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
+// API routes
 app.post('/api/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -114,6 +118,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Handle token verification
 app.post('/api/verify-token', (req, res) => {
   const { token } = req.body;
   if (!token) {
@@ -133,21 +138,26 @@ app.post('/api/verify-token', (req, res) => {
   }
 });
 
+// Example protected route
 app.get('/api/protected', authenticateJWT, (req, res) => {
   res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
 
+// Serve the index.html file for all non-API routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
+// Serve favicon
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'client', 'build', 'favicon.ico')));
 
+// Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
