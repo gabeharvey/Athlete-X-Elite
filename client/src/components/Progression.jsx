@@ -23,7 +23,6 @@ function Progression() {
         direction={{ base: 'column', md: 'row' }} 
         align="center"
       >
-        {/* First Progression Box */}
         <Box
           bgColor="#2C2C2C"
           bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
@@ -56,7 +55,6 @@ function Progression() {
           </Text>
         </Box>
 
-        {/* Second Progression Box */}
         <Box
           bgColor="#2C2C2C"
           bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"

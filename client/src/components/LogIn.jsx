@@ -1,14 +1,46 @@
 import { Box, Text, Button, VStack, Input, FormControl, FormLabel, Link } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; 
+import axios from 'axios'; 
 
 function LogIn() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null); 
+  const navigate = useNavigate(); 
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    console.log('Logging in...');
+  
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, { username, password }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.data.token) {
+        localStorage.setItem('userToken', response.data.token);
+        console.log('Token received and saved');
+        console.log('Navigating to homepage...');
+        navigate('/');
+      } else {
+        setError('Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      console.error('Error logging in:', error);
+      setError(error.response?.data?.message || 'An error occurred. Please try again.');
+    }
+  };  
+
   return (
     <VStack
       spacing={8}
       align="center"
       justify="center"
       p={10}
-      bgImage="url('/basketball.png')" 
+      bgImage="url('/basketball.png')"
       bgSize="contain"
       bgPosition="center"
       bgRepeat="no-repeat"
@@ -17,7 +49,7 @@ function LogIn() {
       <Box
         bgColor="#2C2C2C"
         bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
-        bgSize="5px 5px;"
+        bgSize="5px 5px"
         borderRadius="12px"
         p={8}
         w="300px"
@@ -33,14 +65,20 @@ function LogIn() {
           Log In
         </Text>
 
+        {error && (
+          <Text color="red.500" fontSize="sm" mt={2}>
+            {error}
+          </Text>
+        )}
+
         <FormControl mt={6}>
           <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">
-            Email
+            username
           </FormLabel>
           <Input
             fontFamily="'Changa', cursive"
-            type="email"
-            placeholder="Enter your email"
+            type="username"
+            placeholder="Enter your username"
             bg="transparent"
             color="white"
             borderColor="#FFA500"
@@ -48,6 +86,8 @@ function LogIn() {
             _focus={{ borderColor: '#FFA500', boxShadow: '0 0 5px #FFA500' }}
             borderRadius="8px"
             p={4}
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)} 
           />
         </FormControl>
 
@@ -66,6 +106,8 @@ function LogIn() {
             _focus={{ borderColor: '#FFA500', boxShadow: '0 0 5px #FFA500' }}
             borderRadius="8px"
             p={4}
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
           />
         </FormControl>
 
@@ -86,6 +128,7 @@ function LogIn() {
             color: 'white',
             transform: 'scale(1.05)',
           }}
+          onClick={handleLogin} 
         >
           Log In
         </Button>

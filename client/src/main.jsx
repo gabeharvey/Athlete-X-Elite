@@ -45,7 +45,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       { index: true, element: <MainLayout /> },
-      { path: 'login', element: <LogIn /> },
+      { path: 'login', element: <LogIn /> }, 
       { path: 'baseball', element: <Baseball /> },
       { path: 'basketball', element: <Basketball /> },
       { path: 'biking', element: <Biking /> },
@@ -59,7 +59,10 @@ const router = createBrowserRouter([
       { path: 'track', element: <Track /> },
       { path: 'volleyball', element: <Volleyball /> },
       { path: 'weightlifting', element: <Weightlifting /> },
-      { path: 'signup', element: <SignUp /> },
+      {
+        path: 'signup',
+        element: <SignUp /> 
+      },
       {
         path: 'checkout',
         element: (
@@ -85,14 +88,6 @@ const router = createBrowserRouter([
         )
       },
       {
-        path: 'login',
-        element: (
-          <PrivateRoute>
-            <LogIn />
-          </PrivateRoute>
-        )
-      },
-      {
         path: 'paymentform',
         element: (
           <PrivateRoute>
@@ -113,14 +108,6 @@ const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <ShoppingCart />
-          </PrivateRoute>
-        )
-      },
-      {
-        path: 'signup',
-        element: (
-          <PrivateRoute>
-            <SignUp />
           </PrivateRoute>
         )
       },

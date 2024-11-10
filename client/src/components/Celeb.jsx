@@ -24,7 +24,6 @@ function Celeb() {
         direction={{ base: 'column', md: 'row' }} 
         w="full"
       >
-        {/* Celebrity Image */}
         <Image
           src="/wane-2.png"
           alt="Celebrity Endorsement"
@@ -33,8 +32,6 @@ function Celeb() {
           objectFit="cover"
           boxShadow="0 0 15px rgba(0, 0, 0, 0.7)"
         />
-
-        {/* Quote and Name */}
         <Box
           bgColor="#2C2C2C"
           bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"

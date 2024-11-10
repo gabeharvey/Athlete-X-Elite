@@ -19,13 +19,11 @@ import '../App.css';
 const Navbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showCloseIcon, setShowCloseIcon] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Authentication state
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const menuRef = useRef();
   const navigate = useNavigate();
 
-  // Check login status on component mount
   useEffect(() => {
-    // Check if token exists in localStorage or session
     const token = localStorage.getItem('authToken');
     if (token) {
       setIsLoggedIn(true);
@@ -72,11 +70,10 @@ const Navbar = () => {
     visible: { opacity: 1 },
   };
 
-  // Handle logout logic
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); // Clear token from localStorage
-    setIsLoggedIn(false); // Set isLoggedIn to false
-    navigate('/'); // Redirect to home or login page
+    localStorage.removeItem('authToken'); 
+    setIsLoggedIn(false); 
+    navigate('/'); 
   };
 
   return (
