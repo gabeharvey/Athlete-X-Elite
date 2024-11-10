@@ -161,7 +161,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link as={RouterLink} to="/cart" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
+              <Link as={RouterLink} to="/shoppingcart" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
                 Shopping Cart
               </Link>
               <Link as={RouterLink} to="/checkout" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
@@ -280,7 +280,7 @@ const Navbar = () => {
                   <>
                     <Link
                       as={RouterLink}
-                      to="/cart"
+                      to="/shoppingcart"
                       fontSize="lg"
                       color="#FFFDD0"
                       fontWeight="bold"
