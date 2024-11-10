@@ -12,27 +12,33 @@ function LogIn() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('Logging in...');
-  
+
+    if (!username || !password) {
+      setError('Please enter both username and password.');
+      return;
+    }
+
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, { username, password }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, 
+        { email: username, password }, 
+        { headers: { 'Content-Type': 'application/json' } }
+      );
       if (response.data.token) {
-        localStorage.setItem('userToken', response.data.token);
-        console.log('Token received and saved');
-        console.log('Navigating to homepage...');
-        navigate('/');
+        localStorage.setItem('userToken', response.data.token);  
+        navigate('/');  
       } else {
         setError('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Error logging in:', error);
-      setError(error.response?.data?.message || 'An error occurred. Please try again.');
+
+      if (error.response && error.response.data) {
+        setError(error.response.data.message || 'An error occurred. Please try again.');
+      } else {
+        setError('An error occurred. Please try again later.');
+      }
     }
-  };  
+  };
 
   return (
     <VStack
@@ -64,7 +70,6 @@ function LogIn() {
         <Text fontSize="2xl" fontWeight="bold" color="#FFFDD0" fontFamily="'Changa', cursive">
           Log In
         </Text>
-
         {error && (
           <Text color="red.500" fontSize="sm" mt={2}>
             {error}
@@ -73,11 +78,11 @@ function LogIn() {
 
         <FormControl mt={6}>
           <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">
-            username
+            Email
           </FormLabel>
           <Input
             fontFamily="'Changa', cursive"
-            type="username"
+            type="text" 
             placeholder="Enter your username"
             bg="transparent"
             color="white"

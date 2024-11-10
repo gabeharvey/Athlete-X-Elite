@@ -20,9 +20,10 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// CORS Configuration
 const allowedOrigins = [
   'http://localhost:5173', 
-  'https://athletexelite.onrender.com', 
+  'https://athletexelite.onrender.com',
 ];
 
 const corsOptions = {
@@ -39,9 +40,11 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x-elite', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -49,6 +52,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
+// JWT Authentication Middleware
 const authenticateJWT = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -60,61 +64,40 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-app.post('/api/payment', async (req, res) => {
-  const { amount, id } = req.body;
-  if (!amount || !id) {
-    return res.status(400).json({ message: 'Amount and payment method ID are required' });
-  }
-
-  try {
-    const payment = await stripe.paymentIntents.create({
-      amount,
-      currency: 'usd',
-      description: 'Test payment',
-      payment_method: id,
-      confirm: true,
-      automatic_payment_methods: {
-        enabled: true,
-      },
-    });
-
-    res.json({ message: 'Payment successful', success: true });
-  } catch (error) {
-    console.error('Stripe payment error:', error);
-    res.status(500).json({
-      message: 'Payment failed',
-      success: false,
-      error: error.type,
-      detail: error.raw ? error.raw.message : error.message,
-    });
-  }
-});
-
+// Signup Route
 app.post('/api/signup', async (req, res) => {
-  const { email, password } = req.body;
-  
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
-  }
-
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const { username, email, password } = req.body;
+
+    console.log('Received data:', req.body);  // Add this line to see the incoming request body
+
+    // Check if all fields are provided
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ email, password: hashedPassword });
+    // Create a new user
+    const newUser = new User({ username, email, password });
     await newUser.save();
 
-    const token = jwt.sign({ id: newUser._id, email }, JWT_SECRET, { expiresIn: '1h' });
+    // Generate a JWT token for the user
+    const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '1h' });
+
     res.status(201).json({ message: 'User created successfully', token });
   } catch (error) {
-    console.error('Error creating user:', error);
-    res.status(500).json({ message: 'Error creating user', error: error.message });
+    console.error('Error signing up user:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
   }
 });
 
+
+// Login Route
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -122,14 +105,19 @@ app.post('/api/login', async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+
+    // Compare password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+
+    // Generate JWT token
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
@@ -138,6 +126,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Token Verification Route
 app.post('/api/verify-token', (req, res) => {
   const { token } = req.body;
   if (!token) {
@@ -157,19 +146,23 @@ app.post('/api/verify-token', (req, res) => {
   }
 });
 
+// Protected Route Example
 app.get('/api/protected', authenticateJWT, (req, res) => {
   res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
 
+// Catch-all for front-end routing (for React SPA)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Global error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

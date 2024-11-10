@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Box, Button, Input, FormControl, FormLabel, Text, Heading, Alert, AlertIcon } from '@chakra-ui/react';
+import { Box, Button, Input, FormControl, FormLabel, Text, Heading, Alert, AlertIcon, useToast } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
@@ -7,53 +7,90 @@ import { AuthContext } from '../context/AuthContext';
 const API_URL = import.meta.env.VITE_API_URL;
 
 function SignUp() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: '',
+  });
   const [error, setError] = useState(null);
-  const { login } = useContext(AuthContext); 
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+  const toast = useToast();
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    const { username, email, password } = formData;
     if (!username || !email || !password) {
       setError('Please fill in all fields.');
-      return;
+      return false;
     }
-
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!isValidEmail) {
       setError('Please enter a valid email.');
-      return;
+      return false;
     }
-
-    const isValidPassword = password.length >= 8;
-    if (!isValidPassword) {
+    if (password.length < 8) {
       setError('Password must be at least 8 characters.');
-      return;
+      return false;
     }
-
+    // Optional: Add a more complex password validation
+    const passwordRegex = /^(?=.*[A-Za-z\d])[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      setError('Password must include at least one letter, one number, and one special character.');
+      return false;
+    }
     setError(null);
+    return true;
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+
+    console.log('Form Data:', formData); // Check form data
 
     try {
-      const response = await axios.post(`${API_URL}/api/signup`, {
-        username,
-        email,
-        password,
-      });
-
+      const response = await axios.post(`${API_URL}/api/signup`, formData);
       const { token, message } = response.data;
 
       if (message === 'User created successfully') {
-        
-        login(token); 
+        login(token);
+        setFormData({
+          username: '',
+          email: '',
+          password: ''
+        });
+
+        toast({
+          title: 'Account created.',
+          description: 'You have successfully signed up.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
 
         navigate('/');
       } else {
         setError(message || 'Signup failed');
       }
     } catch (error) {
+      console.error('Signup error:', error);
       setError(error.response?.data?.message || 'Error signing up');
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'An error occurred during signup.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -72,7 +109,7 @@ function SignUp() {
       mt={20}
       mb="10rem"
     >
-      <Heading as="h1" size="xl" mb="1rem" fontFamily="'Changa', cursive" color="#FFFDD0" fontWeight="bold">
+      <Heading as="h1" size="lg" mb="1rem" fontFamily="'Changa', cursive" color="#FFFDD0" fontWeight="bold">
         Create an Account
       </Heading>
 
@@ -98,99 +135,97 @@ function SignUp() {
           </Alert>
         )}
 
-        <FormControl mt={6}>
-          <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Full Name</FormLabel>
-          <Input
-            fontFamily="'Changa', cursive"
-            placeholder="Enter your full name"
-            color="white"
-            borderColor="#FFA500"
-            _hover={{ borderColor: '#FFA500' }}
-            _focus={{ borderColor: '#FFA500' }}
-            bg="transparent"
-            borderRadius="8px"
-            p={4}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </FormControl>
+        <form onSubmit={handleSignup}>
+          <FormControl mt={6}>
+            <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Username</FormLabel>
+            <Input
+              fontFamily="'Changa', cursive"
+              placeholder="Enter your username"
+              color="white"
+              borderColor="#FFA500"
+              _hover={{ borderColor: '#FFA500' }}
+              _focus={{ borderColor: '#FFA500' }}
+              bg="transparent"
+              borderRadius="8px"
+              p={4}
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              required
+            />
+          </FormControl>
 
-        <FormControl mt={6}>
-          <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Email</FormLabel>
-          <Input
-            fontFamily="'Changa', cursive"
-            type="email"
-            placeholder="Enter your email"
-            color="white"
-            borderColor="#FFA500"
-            _hover={{ borderColor: '#FFA500' }}
-            _focus={{ borderColor: '#FFA500' }}
-            bg="transparent"
-            borderRadius="8px"
-            p={4}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </FormControl>
+          <FormControl mt={6}>
+            <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Email</FormLabel>
+            <Input
+              fontFamily="'Changa', cursive"
+              type="email"
+              placeholder="Enter your email"
+              color="white"
+              borderColor="#FFA500"
+              _hover={{ borderColor: '#FFA500' }}
+              _focus={{ borderColor: '#FFA500' }}
+              bg="transparent"
+              borderRadius="8px"
+              p={4}
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
+          </FormControl>
 
-        <FormControl mt={6}>
-          <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Password</FormLabel>
-          <Input
-            fontFamily="'Changa', cursive"
-            type="password"
-            placeholder="Enter your password"
-            color="white"
-            borderColor="#FFA500"
-            _hover={{ borderColor: '#FFA500' }}
-            _focus={{ borderColor: '#FFA500' }}
-            bg="transparent"
-            borderRadius="8px"
-            p={4}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </FormControl>
+          <FormControl mt={6}>
+            <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Password</FormLabel>
+            <Input
+              fontFamily="'Changa', cursive"
+              type="password"
+              placeholder="Enter your password"
+              color="white"
+              borderColor="#FFA500"
+              _hover={{ borderColor: '#FFA500' }}
+              _focus={{ borderColor: '#FFA500' }}
+              bg="transparent"
+              borderRadius="8px"
+              p={4}
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
+              required
+            />
+          </FormControl>
 
-        <Button
-          mt={8}
-          fontFamily="'Tilt Prism', sans-serif"
-          fontWeight="bold"
-          bg="transparent"
-          color="#FFFDD0"
-          border="2px solid #FFA500"
-          borderRadius="8px"
-          padding="10px 20px"
-          fontSize="18px"
-          cursor="pointer"
-          transition="all 0.3s ease"
-          _hover={{
-            bg: '#FFA500',
-            color: 'white',
-            transform: 'scale(1.05)',
-          }}
-          onClick={handleSignup}
-        >
-          Sign Up
-        </Button>
-
-        <Text mt={4} color="#FFFDD0">
-          Already have an account?{' '}
-          <Text
-            as="span"
-            cursor="pointer"
-            color="#FFA500"
-            fontFamily="'Changa', cursive"
-            fontSize="15px"
+          <Button
+            mt={8}
+            fontFamily="'Tilt Prism', sans-serif"
             fontWeight="bold"
-            _hover={{ textDecoration: 'underline' }}
-            onClick={() => navigate('/login')}
+            bg="transparent"
+            color="white"
+            border="2px solid #FFA500"
+            _hover={{
+              backgroundColor: '#FFA500',
+              color: 'black',
+              borderColor: '#FFA500',
+            }}
+            width="100%"
+            type="submit"
           >
-            Log In
+            Sign Up
+          </Button>
+        </form>
+
+        <Box mt={6}>
+          <Text color="#FFFDD0" fontFamily="'Changa', cursive">
+            Already have an account?{' '}
+            <Button
+              variant="link"
+              color="#FFA500"
+              onClick={() => navigate('/login')}
+            >
+              Login
+            </Button>
           </Text>
-        </Text>
+        </Box>
       </Box>
     </Box>
   );
