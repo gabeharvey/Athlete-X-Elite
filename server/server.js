@@ -64,29 +64,20 @@ const authenticateJWT = (req, res, next) => {
   });
 };
 
-// Signup Route
 app.post('/api/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    console.log('Received data:', req.body);  // Add this line to see the incoming request body
-
-    // Check if all fields are provided
+    console.log('Received data:', req.body); 
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
-
-    // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: 'User already exists' });
     }
-
-    // Create a new user
     const newUser = new User({ username, email, password });
     await newUser.save();
-
-    // Generate a JWT token for the user
     const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(201).json({ message: 'User created successfully', token });
@@ -96,8 +87,6 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-
-// Login Route
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -110,14 +99,10 @@ app.post('/api/login', async (req, res) => {
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-
-    // Compare password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-
-    // Generate JWT token
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
@@ -126,7 +111,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Token Verification Route
 app.post('/api/verify-token', (req, res) => {
   const { token } = req.body;
   if (!token) {
@@ -146,23 +130,21 @@ app.post('/api/verify-token', (req, res) => {
   }
 });
 
-// Protected Route Example
 app.get('/api/protected', authenticateJWT, (req, res) => {
   res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
 
-// Catch-all for front-end routing (for React SPA)
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
 });
 
-// Global error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
