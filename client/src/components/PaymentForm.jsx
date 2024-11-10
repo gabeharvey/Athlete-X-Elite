@@ -47,24 +47,24 @@ const PaymentForm = () => {
   };
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      maxW="500px"
-      mx="auto"
-      bgColor="#2C2C2C"
-      bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
-      bgSize="5px 5px"
-      borderRadius="12px"
-      boxShadow="0 0 15px rgba(0, 0, 0, 0.7)"
-      p={8}
-      transition="transform 0.3s, box-shadow 0.3s"
-      _hover={{
-        transform: 'translateY(-10px)',
-        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.9)',
-      }}
-    >
+<Box
+  display="flex"
+  flexDirection="column"
+  alignItems="center"
+  maxW="500px"
+  mx="auto"
+  bgImage="radial-gradient(circle at center, #A9A9F3 0%, #6A5ACD 40%, #483D8B 70%, #191970 100%)" 
+  backgroundSize="150% 150%" 
+  borderRadius="12px"
+  boxShadow="0 0 15px rgba(0, 0, 0, 0.7)"
+  p={8}
+  transition="transform 0.3s, box-shadow 0.3s"
+  _hover={{
+    transform: 'translateY(-10px)',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.9)',
+  }}
+  animation="gradientCorners 5s ease infinite" 
+>
       {!success ? (
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <CardElement
@@ -85,8 +85,8 @@ const PaymentForm = () => {
             type="submit"
             disabled={!stripe || loading}
             bg="transparent"
-            color="#FFFDD0"
-            border="2px solid #FFA500"
+            color="#D3D3D3" 
+            border="2px solid #708090" 
             borderRadius="8px"
             padding="10px 20px"
             fontSize="18px"
@@ -100,12 +100,12 @@ const PaymentForm = () => {
             justifyContent="center"
             transition="all 0.3s ease"
             _hover={{
-              bg: '#FFA500',
-              color: 'white',
+              bg: '#708090', 
+              color: '#F0F8FF', 
               transform: 'scale(1.05)',
             }}
             _active={{
-              bg: '#FF8C00',
+              bg: '#5A6677', 
             }}
           >
             {loading ? 'Processing...' : 'Pay'}
