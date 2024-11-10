@@ -47,24 +47,25 @@ const PaymentForm = () => {
   };
 
   return (
-<Box
-  display="flex"
-  flexDirection="column"
-  alignItems="center"
-  maxW="500px"
-  mx="auto"
-  bgImage="radial-gradient(circle at center, #A9A9F3 0%, #6A5ACD 40%, #483D8B 70%, #191970 100%)" 
-  backgroundSize="150% 150%" 
-  borderRadius="12px"
-  boxShadow="0 0 15px rgba(0, 0, 0, 0.7)"
-  p={8}
-  transition="transform 0.3s, box-shadow 0.3s"
-  _hover={{
-    transform: 'translateY(-10px)',
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.9)',
-  }}
-  animation="gradientCorners 5s ease infinite" 
->
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        maxW="500px"
+        mx="auto"
+        bgImage="radial-gradient(circle at center, #191970 0%, #483D8B 40%, #6A5ACD 70%, #A9A9F3 100%)" 
+        backgroundSize="150% 150%"
+        backgroundPosition="center"
+        borderRadius="12px"
+        boxShadow="0 0 15px rgba(0, 0, 0, 0.7)"
+        p={8}
+        transition="transform 0.3s, box-shadow 0.3s"
+        _hover={{
+          transform: 'translateY(-10px)',
+          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.9)',
+        }}
+        animation="gradientCorners 5s ease infinite"
+      >
       {!success ? (
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <CardElement
