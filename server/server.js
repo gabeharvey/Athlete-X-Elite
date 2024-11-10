@@ -20,7 +20,6 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// CORS Configuration
 const allowedOrigins = [
   'http://localhost:5173', 
   'https://athletexelite.onrender.com',
@@ -42,9 +41,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// MongoDB connection
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x-elite', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -52,7 +51,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// JWT Authentication Middleware
 const authenticateJWT = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -68,7 +66,6 @@ app.post('/api/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    console.log('Received data:', req.body); 
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
@@ -133,8 +130,6 @@ app.post('/api/verify-token', (req, res) => {
 app.get('/api/protected', authenticateJWT, (req, res) => {
   res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
-
-app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
