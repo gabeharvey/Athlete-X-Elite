@@ -13,7 +13,8 @@ export const AuthProvider = ({ children }) => {
   const isValidTokenFormat = (token) => {
     try {
       const decoded = jwtDecode(token);
-      return decoded.exp > Date.now() / 1000; // Check if token is expired
+      // Check if token is expired
+      return decoded.exp > Date.now() / 1000;
     } catch (error) {
       console.error('Invalid token format or decoding failed:', error.message);
       return false;
@@ -24,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true; // Flag to prevent state updates if the component unmounts
     
     const verifyToken = async () => {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('userToken');
       console.log('Retrieved token:', token); // Debugging line
 
       if (token && isValidTokenFormat(token)) {
@@ -42,16 +43,16 @@ export const AuthProvider = ({ children }) => {
           if (response.ok) {
             const data = await response.json();
             if (data.valid && isMounted) {
-              console.log('Token is valid, user authenticated'); // Debugging line
+              console.log('Token is valid, user authenticated');
               setIsAuthenticated(true);
               const decoded = jwtDecode(token);
               setUser(decoded);
             } else {
-              console.log('Token is invalid or expired'); // Debugging line
+              console.log('Token is invalid or expired');
               if (isMounted) {
                 setIsAuthenticated(false);
                 setUser(null);
-                localStorage.removeItem('authToken');
+                localStorage.removeItem('userToken'); // Remove invalid token
               }
             }
           } else {
@@ -59,7 +60,7 @@ export const AuthProvider = ({ children }) => {
             if (isMounted) {
               setIsAuthenticated(false);
               setUser(null);
-              localStorage.removeItem('authToken');
+              localStorage.removeItem('userToken'); // Remove invalid token
             }
           }
         } catch (error) {
@@ -67,11 +68,11 @@ export const AuthProvider = ({ children }) => {
           if (isMounted) {
             setIsAuthenticated(false);
             setUser(null);
-            localStorage.removeItem('authToken');
+            localStorage.removeItem('userToken'); // Remove invalid token
           }
         }
       } else {
-        console.log('Token is missing or invalid format'); // Debugging line
+        console.log('Token is missing or invalid format');
         if (isMounted) {
           setIsAuthenticated(false);
           setUser(null);
@@ -97,20 +98,21 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      localStorage.setItem('authToken', token); // Store token in localStorage
+      localStorage.setItem('userToken', token); // Store token in localStorage with the correct key
       const decoded = jwtDecode(token);
+      console.log('Decoded token during login:', decoded); // Debugging line
       setUser(decoded);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Failed to decode token during login:', error.message);
       setIsAuthenticated(false);
       setUser(null);
-      localStorage.removeItem('authToken');
+      localStorage.removeItem('userToken'); // Remove invalid token
     }
   }, []);
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('userToken');
     setIsAuthenticated(false);
     setUser(null);
   };

@@ -7,45 +7,27 @@ import {
   IconButton,
   useDisclosure,
   Divider,
+  Text,
 } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CgMenuGridO } from 'react-icons/cg';
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios'; // Add axios for API requests
 import '../App.css';
 
 const Navbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showCloseIcon, setShowCloseIcon] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); 
   const menuRef = useRef();
   const navigate = useNavigate();
 
-  // Check if the token exists in localStorage (looking for 'authToken')
+  // Check if the token exists in localStorage (looking for 'userToken')
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      // Validate the token with your backend API
-      axios
-        .get('/api/protected', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          if (response.data.valid) {
-            setIsLoggedIn(true); // Token is valid, user is logged in
-          } else {
-            setIsLoggedIn(false); // Token is invalid, user is not logged in
-          }
-        })
-        .catch(() => {
-          setIsLoggedIn(false); // In case of error (e.g., network issues), set user as logged out
-        });
-    } else {
-      setIsLoggedIn(false); // No token, set as logged out
-    }
-  }, []);
+    const token = localStorage.getItem('userToken'); // Use 'userToken' here instead of 'authToken'
+    setIsLoggedIn(!!token); // Set state to true if token exists, false if it doesn't
+  }, []); // Empty dependency array ensures this runs once when the component mounts
 
   useEffect(() => {
     if (isOpen) {
@@ -88,9 +70,9 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    setIsLoggedIn(false);
-    navigate('/'); // Redirect to the homepage after logout
+    localStorage.removeItem('userToken'); // Remove 'userToken' on logout
+    setIsLoggedIn(false); // Update state to reflect the user is logged out
+    navigate('/'); // Redirect to the homepage
   };
 
   return (
@@ -202,43 +184,42 @@ const Navbar = () => {
               bgSize="5px 5px"
               zIndex="overlay"
               color="#FFFDD0"
-              p="3rem"
+              borderTopLeftRadius="30px"
+              borderBottomLeftRadius="30px"
+              boxShadow="0 0 20px rgba(0, 0, 0, 0.9)"
             >
               <motion.div variants={itemVariants}>
-                <Heading as="h3" size="lg" textAlign="center" color="#FFFDD0">
-                  Menu
-                </Heading>
-                <Divider my="1rem" borderColor="#FFFDD0" />
-              </motion.div>
-              <motion.div variants={itemVariants}>
-                <Link as={RouterLink} to="/" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
-                  Home
-                </Link>
-                <Link as={RouterLink} to="/elite" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
-                  Elite
-                </Link>
-                {!isLoggedIn ? (
-                  <>
-                    <Link as={RouterLink} to="/login" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
-                      Log In
-                    </Link>
-                    <Link as={RouterLink} to="/signup" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
-                      Sign Up
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <Link as={RouterLink} to="/shoppingcart" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
-                      Shopping Cart
-                    </Link>
-                    <Link as={RouterLink} to="/checkout" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
-                      Checkout
-                    </Link>
-                    <Link as={RouterLink} to="/" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={() => { handleLogout(); onClose(); }}>
-                      Log Out
-                    </Link>
-                  </>
-                )}
+                <Flex alignItems="center" justifyContent="space-between" mb="1rem">
+                  <Text fontSize="2xl" fontWeight="bold" color="#FFFDD0" ml="20px" mt="20px">
+                    Menu
+                  </Text>
+                  <IconButton
+                    aria-label="Close Menu"
+                    icon={<CloseIcon boxSize="20px" stroke="#FFFDD0" strokeWidth="2px"/>}
+                    variant="unstyled"
+                    fontSize="24px"
+                    onClick={onClose}
+                    mt="20px"
+                    mr="10px"
+                  />
+                </Flex>
+                <Divider borderColor="#FFFDD0" borderWidth="2px" mb="1rem" opacity="1" />
+                <motion.div variants={itemVariants} textAlign='left'>
+                  <Link as={RouterLink} to="/" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Home</Link>
+                  <Link as={RouterLink} to="/elite" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Elite</Link>
+                  {!isLoggedIn ? (
+                    <>
+                      <Link as={RouterLink} to="/login" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Log In</Link>
+                      <Link as={RouterLink} to="/signup" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Sign Up</Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link as={RouterLink} to="/shoppingcart" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Shopping Cart</Link>
+                      <Link as={RouterLink} to="/checkout" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Checkout</Link>
+                      <Link as={RouterLink} to="/" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }} onClick={handleLogout}>Log Out</Link>
+                    </>
+                  )}
+                </motion.div>
               </motion.div>
             </Box>
           </motion.div>

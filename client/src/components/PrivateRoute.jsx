@@ -7,8 +7,9 @@ const PrivateRoute = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    setIsLoggedIn(!!token);
+    // Retrieve token from localStorage using the correct key
+    const token = localStorage.getItem('userToken');
+    setIsLoggedIn(!!token); // Set login state based on whether token exists
   }, []);
 
   if (!isLoggedIn) {

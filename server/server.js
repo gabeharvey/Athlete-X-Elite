@@ -143,13 +143,17 @@ app.post('/api/verify-token', (req, res) => {
   }
 
   try {
+    // Use jwt.verify to validate the token
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
+        // If token verification fails, send invalid response
         return res.status(401).json({ valid: false });
       }
+      // Token is valid, return the decoded data with a valid status
       res.json({ valid: true, decoded });
     });
   } catch (error) {
+    // Catch any unexpected errors and send an invalid response
     console.error('Error verifying token:', error);
     res.status(500).json({ valid: false });
   }
