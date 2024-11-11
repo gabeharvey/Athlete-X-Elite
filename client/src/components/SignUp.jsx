@@ -253,20 +253,24 @@ function SignUp() {
           </FormControl>
 
           <Button
-            mt={8}
-            fontFamily="'Tilt Prism', sans-serif"
-            fontWeight="bold"
-            bg="transparent"
-            color="white"
-            border="2px solid #FFA500"
-            _hover={{
-              backgroundColor: '#FFA500',
-              color: 'black',
-              borderColor: '#FFA500',
-            }}
-            width="100%"
-            type="submit"
-            isLoading={false}  // Add isLoading for visual feedback if needed
+          mt={8}
+          fontFamily="'Tilt Prism', sans-serif"
+          fontWeight="bold"
+          bg="transparent"
+          color="#FFFDD0"
+          border="2px solid #FFA500"
+          borderRadius="8px"
+          padding="10px 20px"
+          fontSize="18px"
+          cursor="pointer"
+          transition="all 0.3s ease"
+          _hover={{
+            bg: '#FFA500',
+            color: 'white',
+            transform: 'scale(1.05)',
+          }}
+          type='submit'
+            isLoading={false} 
           >
             Sign Up
           </Button>
