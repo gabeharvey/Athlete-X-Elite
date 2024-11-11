@@ -28,11 +28,10 @@ const Checkout = () => {
     >
       <Heading
         as="h1"
-        size="xl"
+        size="lg"
         mb="1.5rem"
         fontFamily="'Changa', cursive"
         color="#FFFDD0"
-        fontWeight="900"
         textAlign="center"
       >
         Checkout

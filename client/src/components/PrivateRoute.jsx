@@ -1,23 +1,18 @@
 /* eslint-disable react/prop-types */
-// PrivateRoute.js
-import { Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated } = useContext(AuthContext);
+  const location = useLocation();
 
-  useEffect(() => {
-    // Retrieve token from localStorage using the correct key
-    const token = localStorage.getItem('userToken');
-    setIsLoggedIn(!!token); // Set login state based on whether token exists
-  }, []);
-
-  if (!isLoggedIn) {
-    // Redirect to login page if not logged in
-    return <Navigate to="/login" />;
+  // If not authenticated, redirect to login page
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children; // Render the child component (protected page) if logged in
+  return children; // Render children if authenticated
 };
 
 export default PrivateRoute;

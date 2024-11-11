@@ -34,11 +34,10 @@ const ShoppingCart = () => {
     >
       <Heading
         as="h1"
-        size="xl"
+        size="lg"
         mb="1rem"
         fontFamily="'Changa', cursive"
         color="#FFFDD0" 
-        fontWeight="900"
       >
         Your Shopping Cart
       </Heading>
