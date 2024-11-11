@@ -13,6 +13,7 @@ function SignUp() {
     password: '',
   });
   const [error, setError] = useState(null);
+  const [isRegistered, setIsRegistered] = useState(false);  // New state to track registration success
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const toast = useToast();
@@ -85,6 +86,7 @@ function SignUp() {
       if (message === 'User created successfully') {
         login(token); // Store token in AuthContext (or localStorage/sessionStorage)
         resetFormData(); // Clear form fields
+        setIsRegistered(true);  // Set registration success to true
   
         // Show success toast
         toast({
@@ -177,7 +179,7 @@ function SignUp() {
           </Alert>
         )}
 
-        {!error && formData.username && formData.email && formData.password && (
+        {isRegistered && (
           <Alert 
             status="success" 
             mt={4} 
@@ -265,32 +267,18 @@ function SignUp() {
           cursor="pointer"
           transition="all 0.3s ease"
           _hover={{
-            bg: '#FFA500',
-            color: 'white',
+            backgroundColor: '#FFA500',
+            color: '#2C2C2C',
             transform: 'scale(1.05)',
           }}
-          type='submit'
-            isLoading={false} 
-          >
-            Sign Up
-          </Button>
-        </form>
-
-        <Box mt={6}>
-          <Text color="#FFFDD0" fontFamily="'Changa', cursive">
-            Already have an account?{' '}
-            <Button
-              variant="link"
-              color="#FFA500"
-              onClick={() => navigate('/login')}
-            >
-              Login
-            </Button>
-          </Text>
-        </Box>
-      </Box>
+          type="submit"
+        >
+          Sign Up
+        </Button>
+      </form>
     </Box>
-  );
+  </Box>
+);
 }
 
 export default SignUp;
