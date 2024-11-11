@@ -23,11 +23,10 @@ const Navbar = () => {
   const menuRef = useRef();
   const navigate = useNavigate();
 
+  // Check if the token exists in localStorage (looking for 'userToken')
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setIsLoggedIn(true);
-    }
+    const token = localStorage.getItem('userToken'); // Use 'userToken' here instead of 'authToken'
+    setIsLoggedIn(!!token); // Set state to true if token exists, false if it doesn't
   }, []);
 
   useEffect(() => {
@@ -71,9 +70,9 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken'); 
-    setIsLoggedIn(false); 
-    navigate('/'); 
+    localStorage.removeItem('userToken'); // Remove 'userToken' on logout
+    setIsLoggedIn(false); // Update state to reflect the user is logged out
+    navigate('/'); // Redirect to the homepage
   };
 
   return (
@@ -213,32 +212,28 @@ const Navbar = () => {
                 />
               </Flex>
               <Divider borderColor="#FFFDD0" borderWidth="2px" opacity="1" />
-              <Flex direction="column" alignItems="center" gap="2rem" mt="2rem">
+              <Flex direction="column" alignItems="center" mt="1.5rem" gap="3rem">
                 <Link
                   as={RouterLink}
                   to="/"
-                  fontSize="lg"
-                  color="#FFFDD0"
+                  fontSize="xl"
                   fontWeight="bold"
-                  _hover={{ color: 'gold' }}
-                  onClick={onClose}
-                  px="1rem" 
-                  width="100%" 
-                  textAlign="left" 
+                  _hover={{
+                    color: 'gold',
+                    transform: 'scale(1.1)'
+                  }}
                 >
                   Home
                 </Link>
                 <Link
                   as={RouterLink}
                   to="/elite"
-                  fontSize="lg"
-                  color="#FFFDD0"
+                  fontSize="xl"
                   fontWeight="bold"
-                  _hover={{ color: 'gold' }}
-                  onClick={onClose}
-                  px="1rem" 
-                  width="100%"
-                  textAlign="left"
+                  _hover={{
+                    color: 'gold',
+                    transform: 'scale(1.1)'
+                  }}
                 >
                   Elite
                 </Link>
@@ -247,28 +242,24 @@ const Navbar = () => {
                     <Link
                       as={RouterLink}
                       to="/login"
-                      fontSize="lg"
-                      color="#FFFDD0"
+                      fontSize="xl"
                       fontWeight="bold"
-                      _hover={{ color: 'gold' }}
-                      onClick={onClose}
-                      px="1rem"
-                      width="100%"
-                      textAlign="left"
+                      _hover={{
+                        color: 'gold',
+                        transform: 'scale(1.1)'
+                      }}
                     >
                       Log In
                     </Link>
                     <Link
                       as={RouterLink}
                       to="/signup"
-                      fontSize="lg"
-                      color="#FFFDD0"
+                      fontSize="xl"
                       fontWeight="bold"
-                      _hover={{ color: 'gold' }}
-                      onClick={onClose}
-                      px="1rem"
-                      width="100%"
-                      textAlign="left"
+                      _hover={{
+                        color: 'gold',
+                        transform: 'scale(1.1)'
+                      }}
                     >
                       Sign Up
                     </Link>
@@ -278,42 +269,37 @@ const Navbar = () => {
                     <Link
                       as={RouterLink}
                       to="/shoppingcart"
-                      fontSize="lg"
-                      color="#FFFDD0"
+                      fontSize="xl"
                       fontWeight="bold"
-                      _hover={{ color: 'gold' }}
-                      onClick={onClose}
-                      px="1rem"
-                      width="100%"
-                      textAlign="left"
+                      _hover={{
+                        color: 'gold',
+                        transform: 'scale(1.1)'
+                      }}
                     >
                       Shopping Cart
                     </Link>
                     <Link
                       as={RouterLink}
                       to="/checkout"
-                      fontSize="lg"
-                      color="#FFFDD0"
+                      fontSize="xl"
                       fontWeight="bold"
-                      _hover={{ color: 'gold' }}
-                      onClick={onClose}
-                      px="1rem"
-                      width="100%"
-                      textAlign="left"
+                      _hover={{
+                        color: 'gold',
+                        transform: 'scale(1.1)'
+                      }}
                     >
                       Checkout
                     </Link>
                     <Link
                       as={RouterLink}
                       to="/"
-                      fontSize="lg"
-                      color="#FFFDD0"
+                      fontSize="xl"
                       fontWeight="bold"
-                      _hover={{ color: 'gold' }}
+                      _hover={{
+                        color: 'gold',
+                        transform: 'scale(1.1)'
+                      }}
                       onClick={handleLogout}
-                      px="1rem"
-                      width="100%"
-                      textAlign="left"
                     >
                       Log Out
                     </Link>
@@ -323,7 +309,7 @@ const Navbar = () => {
             </motion.div>
           </Box>
         </motion.div>
-      )}
+        )}
       </Flex>
     </Box>
   );

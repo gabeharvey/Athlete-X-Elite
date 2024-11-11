@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import jwtDecode from 'jwt-decode';
 
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
   const isValidTokenFormat = (token) => {
     try {
       const decoded = jwtDecode(token);
-      return decoded.exp > Date.now() / 1000; 
+      return decoded.exp > Date.now() / 1000; // Check if token is expired
     } catch (error) {
       console.error('Invalid token format or decoding failed:', error.message);
       return false;
@@ -21,8 +21,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    let isMounted = true; // Flag to prevent state updates if the component unmounts
+    
     const verifyToken = async () => {
       const token = localStorage.getItem('authToken');
+      console.log('Retrieved token:', token); // Debugging line
 
       if (token && isValidTokenFormat(token)) {
         try {
@@ -38,46 +41,63 @@ export const AuthProvider = ({ children }) => {
 
           if (response.ok) {
             const data = await response.json();
-            if (data.valid) {
+            if (data.valid && isMounted) {
+              console.log('Token is valid, user authenticated'); // Debugging line
               setIsAuthenticated(true);
               const decoded = jwtDecode(token);
               setUser(decoded);
             } else {
+              console.log('Token is invalid or expired'); // Debugging line
+              if (isMounted) {
+                setIsAuthenticated(false);
+                setUser(null);
+                localStorage.removeItem('authToken');
+              }
+            }
+          } else {
+            console.error('Server error during token verification:', response.statusText);
+            if (isMounted) {
               setIsAuthenticated(false);
               setUser(null);
               localStorage.removeItem('authToken');
             }
-          } else {
-            console.error('Server error during token verification:', response.statusText);
+          }
+        } catch (error) {
+          console.error('Token verification failed:', error.message);
+          if (isMounted) {
             setIsAuthenticated(false);
             setUser(null);
             localStorage.removeItem('authToken');
           }
-        } catch (error) {
-          console.error('Token verification failed:', error.message);
-          setIsAuthenticated(false);
-          setUser(null);
-          localStorage.removeItem('authToken');
         }
       } else {
-        setIsAuthenticated(false);
-        setUser(null);
+        console.log('Token is missing or invalid format'); // Debugging line
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setUser(null);
+        }
       }
 
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false); // Update loading state after checking the token
+      }
     };
 
     verifyToken();
-  }, []);
 
-  const login = (token) => {
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array to run this effect only once
+
+  const login = useCallback((token) => {
     if (!isValidTokenFormat(token)) {
       console.error('Invalid token format');
       return;
     }
 
     try {
-      localStorage.setItem('authToken', token);
+      localStorage.setItem('authToken', token); // Store token in localStorage
       const decoded = jwtDecode(token);
       setUser(decoded);
       setIsAuthenticated(true);
@@ -87,7 +107,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       localStorage.removeItem('authToken');
     }
-  };
+  }, []);
 
   const logout = () => {
     localStorage.removeItem('authToken');
@@ -96,7 +116,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading-spinner">Loading...</div>; // Add a styled spinner here
   }
 
   return (

@@ -1,14 +1,17 @@
-import { Box, Text, Button, VStack, Input, FormControl, FormLabel, Link } from '@chakra-ui/react';
+import { Box, Text, Button, VStack, Input, FormControl, FormLabel, Link, Spinner } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 function LogIn() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || '/';
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -18,6 +21,7 @@ function LogIn() {
       return;
     }
 
+    setLoading(true); // Set loading to true while making the request
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/login`,
@@ -25,10 +29,8 @@ function LogIn() {
         { headers: { 'Content-Type': 'application/json' } }
       );
 
-      console.log(response.data);
-
       if (response.data.token) {
-        // Store the token in localStorage
+        // Store the token in localStorage or sessionStorage based on your preference
         localStorage.setItem('userToken', response.data.token);
         navigate('/');  // Redirect to the home page
       } else {
@@ -36,14 +38,16 @@ function LogIn() {
       }
     } catch (error) {
       console.error('Error logging in:', error);
-
       // Handle error response
       if (error.response && error.response.data) {
         setError(error.response.data.message || 'An error occurred. Please try again.');
       } else {
         setError('An error occurred. Please try again later.');
       }
+    } finally {
+      setLoading(false); // Reset loading state after request
     }
+    navigate(from);
   };
 
   return (
@@ -140,8 +144,9 @@ function LogIn() {
             transform: 'scale(1.05)',
           }}
           onClick={handleLogin}
+          isLoading={loading} // Add a loading state to the button
         >
-          Log In
+          {loading ? <Spinner color="white" /> : 'Log In'}
         </Button>
 
         <Text mt={6} color="#FFFDD0" fontFamily="'Changa', cursive">
