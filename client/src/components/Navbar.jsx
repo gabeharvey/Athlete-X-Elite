@@ -7,26 +7,44 @@ import {
   IconButton,
   useDisclosure,
   Divider,
-  Text,
 } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CgMenuGridO } from 'react-icons/cg';
 import { useState, useEffect, useRef } from 'react';
+import axios from 'axios'; // Add axios for API requests
 import '../App.css';
 
 const Navbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showCloseIcon, setShowCloseIcon] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const menuRef = useRef();
   const navigate = useNavigate();
 
-  // Check if the token exists in localStorage (looking for 'userToken')
+  // Check if the token exists in localStorage (looking for 'authToken')
   useEffect(() => {
-    const token = localStorage.getItem('userToken'); // Use 'userToken' here instead of 'authToken'
-    setIsLoggedIn(!!token); // Set state to true if token exists, false if it doesn't
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      // Validate the token with your backend API
+      axios
+        .get('/api/protected', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          if (response.data.valid) {
+            setIsLoggedIn(true); // Token is valid, user is logged in
+          } else {
+            setIsLoggedIn(false); // Token is invalid, user is not logged in
+          }
+        })
+        .catch(() => {
+          setIsLoggedIn(false); // In case of error (e.g., network issues), set user as logged out
+        });
+    } else {
+      setIsLoggedIn(false); // No token, set as logged out
+    }
   }, []);
 
   useEffect(() => {
@@ -70,16 +88,16 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userToken'); // Remove 'userToken' on logout
-    setIsLoggedIn(false); // Update state to reflect the user is logged out
-    navigate('/'); // Redirect to the homepage
+    localStorage.removeItem('authToken');
+    setIsLoggedIn(false);
+    navigate('/'); // Redirect to the homepage after logout
   };
 
   return (
     <Box
       bgColor="#2C2C2C"
       bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
-      bgSize="5px 5px;"
+      bgSize="5px 5px"
       py="2.5rem"
       px="2rem"
       position="relative"
@@ -171,144 +189,59 @@ const Navbar = () => {
         </Flex>
 
         {isOpen && (
-        <motion.div initial="hidden" animate="visible" exit="exit" variants={menuVariants}>
-          <Box
-            ref={menuRef}
-            position="fixed"
-            top="0"
-            right="0"
-            width="70%"
-            height="100vh"
-            bgColor="#2C2C2C"
-            bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
-            bgSize="5px 5px"
-            zIndex="overlay"
-            color="#FFFDD0"
-            borderTopLeftRadius="30px"
-            borderBottomLeftRadius="30px"
-            boxShadow="0 0 20px rgba(0, 0, 0, 0.9)"
-          >
-            <motion.div variants={itemVariants}>
-              <Flex alignItems="center" justifyContent="space-between" mb="1rem">
-                <Text fontSize="2xl" fontWeight="bold" color="#FFFDD0" ml="20px" mt="20px">
+          <motion.div initial="hidden" animate="visible" exit="exit" variants={menuVariants}>
+            <Box
+              ref={menuRef}
+              position="fixed"
+              top="0"
+              right="0"
+              width="70%"
+              height="100vh"
+              bgColor="#2C2C2C"
+              bgImage="linear-gradient(-45deg, black 25%, transparent 25%, transparent 50%, black 50%, black 75%, transparent 75%, transparent)"
+              bgSize="5px 5px"
+              zIndex="overlay"
+              color="#FFFDD0"
+              p="3rem"
+            >
+              <motion.div variants={itemVariants}>
+                <Heading as="h3" size="lg" textAlign="center" color="#FFFDD0">
                   Menu
-                </Text>
-                <IconButton
-                  aria-label="Close Menu"
-                  icon={<CloseIcon boxSize="20px" stroke="#FFFDD0" strokeWidth="2px"/>}
-                  variant="unstyled"
-                  fontSize="24px" 
-                  _focus={{ boxShadow: 'none' }}
-                  color="#FFFDD0"
-                  mt="18px"
-                  mr="20px"
-                  onClick={onClose}
-                  _hover={{
-                    transform: 'scale(1.1)', 
-                  }}
-                  _active={{
-                    transform: 'scale(0.95)' 
-                  }}
-                />
-              </Flex>
-              <Divider borderColor="#FFFDD0" borderWidth="2px" opacity="1" />
-              <Flex direction="column" alignItems="center" mt="1.5rem" gap="3rem">
-                <Link
-                  as={RouterLink}
-                  to="/"
-                  fontSize="xl"
-                  fontWeight="bold"
-                  _hover={{
-                    color: 'gold',
-                    transform: 'scale(1.1)'
-                  }}
-                >
+                </Heading>
+                <Divider my="1rem" borderColor="#FFFDD0" />
+              </motion.div>
+              <motion.div variants={itemVariants}>
+                <Link as={RouterLink} to="/" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
                   Home
                 </Link>
-                <Link
-                  as={RouterLink}
-                  to="/elite"
-                  fontSize="xl"
-                  fontWeight="bold"
-                  _hover={{
-                    color: 'gold',
-                    transform: 'scale(1.1)'
-                  }}
-                >
+                <Link as={RouterLink} to="/elite" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
                   Elite
                 </Link>
                 {!isLoggedIn ? (
                   <>
-                    <Link
-                      as={RouterLink}
-                      to="/login"
-                      fontSize="xl"
-                      fontWeight="bold"
-                      _hover={{
-                        color: 'gold',
-                        transform: 'scale(1.1)'
-                      }}
-                    >
+                    <Link as={RouterLink} to="/login" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
                       Log In
                     </Link>
-                    <Link
-                      as={RouterLink}
-                      to="/signup"
-                      fontSize="xl"
-                      fontWeight="bold"
-                      _hover={{
-                        color: 'gold',
-                        transform: 'scale(1.1)'
-                      }}
-                    >
+                    <Link as={RouterLink} to="/signup" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
                       Sign Up
                     </Link>
                   </>
                 ) : (
                   <>
-                    <Link
-                      as={RouterLink}
-                      to="/shoppingcart"
-                      fontSize="xl"
-                      fontWeight="bold"
-                      _hover={{
-                        color: 'gold',
-                        transform: 'scale(1.1)'
-                      }}
-                    >
+                    <Link as={RouterLink} to="/shoppingcart" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
                       Shopping Cart
                     </Link>
-                    <Link
-                      as={RouterLink}
-                      to="/checkout"
-                      fontSize="xl"
-                      fontWeight="bold"
-                      _hover={{
-                        color: 'gold',
-                        transform: 'scale(1.1)'
-                      }}
-                    >
+                    <Link as={RouterLink} to="/checkout" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={onClose}>
                       Checkout
                     </Link>
-                    <Link
-                      as={RouterLink}
-                      to="/"
-                      fontSize="xl"
-                      fontWeight="bold"
-                      _hover={{
-                        color: 'gold',
-                        transform: 'scale(1.1)'
-                      }}
-                      onClick={handleLogout}
-                    >
+                    <Link as={RouterLink} to="/" display="block" fontSize="md" color="#FFFDD0" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={() => { handleLogout(); onClose(); }}>
                       Log Out
                     </Link>
                   </>
                 )}
-              </Flex>
-            </motion.div>
-          </Box>
-        </motion.div>
+              </motion.div>
+            </Box>
+          </motion.div>
         )}
       </Flex>
     </Box>

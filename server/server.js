@@ -77,8 +77,6 @@ app.get('/', (req, res) => {
   res.send('Server is working');
 });
 
-// API routes
-
 // User signup route
 app.post('/api/signup', async (req, res) => {
   const { username, email, password } = req.body;
@@ -99,10 +97,8 @@ app.post('/api/signup', async (req, res) => {
     const user = new User({ username, email, password });
     await user.save();
 
-    // Generate JWT token (optional)
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
-    });
+    // Generate JWT token
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
     res.status(201).json({ token, message: 'User registered successfully!' });
   } catch (error) {
@@ -132,7 +128,7 @@ app.post('/api/login', async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: 'Login successful', token, user: { id: user._id, username: user.username, email: user.email } });
   } catch (error) {
     console.error('Error logging in:', error);
     res.status(500).json({ message: 'Error logging in' });

@@ -1,33 +1,22 @@
-import { useContext } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext.jsx';
-import PropTypes from 'prop-types';
-import { Spinner, Center } from '@chakra-ui/react';
+/* eslint-disable react/prop-types */
+// PrivateRoute.js
+import { Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useContext(AuthContext);
-  const location = useLocation();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Show a loading spinner while checking the authentication state
-  if (loading) {
-    return (
-      <Center h="100vh">
-        <Spinner size="xl" />
-      </Center>
-    );
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  if (!isLoggedIn) {
+    // Redirect to login page if not logged in
+    return <Navigate to="/login" />;
   }
 
-  // If the user is authenticated, render the children (protected route)
-  if (isAuthenticated) {
-    return children;
-  }
-
-  // If the user is not authenticated, redirect to the login page
-  return <Navigate to="/login" state={{ from: location }} />;
-};
-
-PrivateRoute.propTypes = {
-  children: PropTypes.node.isRequired,
+  return children; // Render the child component (protected page) if logged in
 };
 
 export default PrivateRoute;
