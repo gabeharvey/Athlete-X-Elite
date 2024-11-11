@@ -19,15 +19,26 @@ import '../App.css';
 const Navbar = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showCloseIcon, setShowCloseIcon] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState(''); // To store the logged-in username
   const menuRef = useRef();
   const navigate = useNavigate();
 
-  // Check if the token exists in localStorage (looking for 'userToken')
+  // Check if the token and username exist in localStorage
   useEffect(() => {
-    const token = localStorage.getItem('userToken'); // Use 'userToken' here instead of 'authToken'
-    setIsLoggedIn(!!token); // Set state to true if token exists, false if it doesn't
-  }, []); // Empty dependency array ensures this runs once when the component mounts
+    const token = localStorage.getItem('userToken');
+    const savedUsername = localStorage.getItem('username');
+    setIsLoggedIn(!!token);
+    
+    // Add a console log to ensure that the username is being retrieved
+    console.log("Retrieved username:", savedUsername);
+    
+    if (savedUsername) {
+      setUsername(savedUsername); // Set username if available
+    } else {
+      setUsername(''); // Reset if no username is found
+    }
+  }, []);  
 
   useEffect(() => {
     if (isOpen) {
@@ -70,9 +81,11 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('userToken'); // Remove 'userToken' on logout
-    setIsLoggedIn(false); // Update state to reflect the user is logged out
-    navigate('/'); // Redirect to the homepage
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('username');
+    setIsLoggedIn(false);
+    setUsername('');
+    navigate('/');
   };
 
   return (
@@ -140,32 +153,89 @@ const Navbar = () => {
           flex="1"
           justifyContent="space-evenly"
         >
-          <Link as={RouterLink} to="/" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
+          <Link
+            as={RouterLink}
+            to="/"
+            fontSize="md"
+            color="#FFFDD0"
+            fontWeight="bold"
+            _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+          >
             Home
           </Link>
-          <Link as={RouterLink} to="/elite" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
+          <Link
+            as={RouterLink}
+            to="/elite"
+            fontSize="md"
+            color="#FFFDD0"
+            fontWeight="bold"
+            _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+          >
             Elite
           </Link>
           {!isLoggedIn ? (
             <>
-              <Link as={RouterLink} to="/login" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
+              <Link
+                as={RouterLink}
+                to="/login"
+                fontSize="md"
+                color="#FFFDD0"
+                fontWeight="bold"
+                _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+              >
                 Log In
               </Link>
-              <Link as={RouterLink} to="/signup" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
+              <Link
+                as={RouterLink}
+                to="/signup"
+                fontSize="md"
+                color="#FFFDD0"
+                fontWeight="bold"
+                _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+              >
                 Sign Up
               </Link>
             </>
           ) : (
             <>
-              <Link as={RouterLink} to="/shoppingcart" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
+              
+              <Link
+                as={RouterLink}
+                to="/shoppingcart"
+                fontSize="md"
+                color="#FFFDD0"
+                fontWeight="bold"
+                _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+              >
                 Shopping Cart
               </Link>
-              <Link as={RouterLink} to="/checkout" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }}>
+              <Link
+                as={RouterLink}
+                to="/checkout"
+                fontSize="md"
+                color="#FFFDD0"
+                fontWeight="bold"
+                _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+              >
                 Checkout
               </Link>
-              <Link as={RouterLink} to="/" fontSize="md" color="#FFFDD0" fontWeight="bold" _hover={{ transform: 'scale(1.05)', color: 'gold' }} onClick={handleLogout}>
+              <Link
+                as={RouterLink}
+                to="/"
+                fontSize="md"
+                color="#FFFDD0"
+                fontWeight="bold"
+                _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                onClick={handleLogout}
+              >
                 Log Out
               </Link>
+              <Text color="#FFFDD0" fontWeight="bold" fontSize="lg">
+                {"Logged in as "}
+                <span style={{ fontFamily: 'Tilt Prism, sans-serif', transform: 'rotate(-5deg)' }}>
+                  {username}
+                </span>
+              </Text>
             </>
           )}
         </Flex>
@@ -195,7 +265,7 @@ const Navbar = () => {
                   </Text>
                   <IconButton
                     aria-label="Close Menu"
-                    icon={<CloseIcon boxSize="20px" stroke="#FFFDD0" strokeWidth="2px"/>}
+                    icon={<CloseIcon boxSize="20px" stroke="#FFFDD0" strokeWidth="2px" />}
                     variant="unstyled"
                     fontSize="24px"
                     onClick={onClose}
@@ -204,19 +274,119 @@ const Navbar = () => {
                   />
                 </Flex>
                 <Divider borderColor="#FFFDD0" borderWidth="2px" mb="1rem" opacity="1" />
-                <motion.div variants={itemVariants} textAlign='left'>
-                  <Link as={RouterLink} to="/" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Home</Link>
-                  <Link as={RouterLink} to="/elite" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Elite</Link>
+                <motion.div variants={itemVariants} textAlign="left">
+                  <Link
+                    as={RouterLink}
+                    to="/"
+                    fontSize="lg"
+                    fontWeight="bold"
+                    color="#FFFDD0"
+                    display="block"
+                    mb="1rem"
+                    ml="20px"
+                    onClick={onClose}
+                    _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                  >
+                    Home
+                  </Link>
+                  <Link
+                    as={RouterLink}
+                    to="/elite"
+                    fontSize="lg"
+                    fontWeight="bold"
+                    color="#FFFDD0"
+                    display="block"
+                    mb="1rem"
+                    ml="20px"
+                    onClick={onClose}
+                    _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                  >
+                    Elite
+                  </Link>
                   {!isLoggedIn ? (
                     <>
-                      <Link as={RouterLink} to="/login" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Log In</Link>
-                      <Link as={RouterLink} to="/signup" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Sign Up</Link>
+                      <Link
+                        as={RouterLink}
+                        to="/login"
+                        fontSize="lg"
+                        fontWeight="bold"
+                        color="#FFFDD0"
+                        display="block"
+                        mb="1rem"
+                        ml="20px"
+                        onClick={onClose}
+                        _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                      >
+                        Log In
+                      </Link>
+                      <Link
+                        as={RouterLink}
+                        to="/signup"
+                        fontSize="lg"
+                        fontWeight="bold"
+                        color="#FFFDD0"
+                        display="block"
+                        mb="1rem"
+                        ml="20px"
+                        onClick={onClose}
+                        _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                      >
+                        Sign Up
+                      </Link>
                     </>
                   ) : (
                     <>
-                      <Link as={RouterLink} to="/shoppingcart" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Shopping Cart</Link>
-                      <Link as={RouterLink} to="/checkout" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }}>Checkout</Link>
-                      <Link as={RouterLink} to="/" fontSize="lg" color="#FFFDD0" display="block" mb="1rem" ml="1rem" fontWeight="bold" _hover={{ color: 'gold' }} onClick={handleLogout}>Log Out</Link>
+                      <Link
+                        as={RouterLink}
+                        to="/shoppingcart"
+                        fontSize="lg"
+                        fontWeight="bold"
+                        color="#FFFDD0"
+                        display="block"
+                        mb="1rem"
+                        ml="20px"
+                        onClick={onClose}
+                        _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                      >
+                        Shopping Cart
+                      </Link>
+                      <Link
+                        as={RouterLink}
+                        to="/checkout"
+                        fontSize="lg"
+                        fontWeight="bold"
+                        color="#FFFDD0"
+                        display="block"
+                        mb="1rem"
+                        ml="20px"
+                        onClick={onClose}
+                        _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                      >
+                        Checkout
+                      </Link>
+                      <Link
+                        as={RouterLink}
+                        to="/"
+                        fontSize="lg"
+                        fontWeight="bold"
+                        color="#FFFDD0"
+                        display="block"
+                        mb="1rem"
+                        ml="20px"
+                        onClick={() => {
+                          handleLogout();
+                          onClose();
+                        }}
+                        _hover={{ transform: 'scale(1.05)', color: 'gold' }}
+                      >
+                        Log Out
+                      </Link>
+                      <Text color="#FFFDD0" fontWeight="bold" fontSize="lg" ml="20px">
+                        {"Logged in as "}
+                        <span style={{ fontFamily: 'Tilt Prism, sans-serif', transform: 'rotate(-5deg)' }}>
+                          {username}
+                        </span>
+                      </Text>
                     </>
                   )}
                 </motion.div>

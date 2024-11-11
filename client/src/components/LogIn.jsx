@@ -32,7 +32,9 @@ function LogIn() {
       if (response.data.token) {
         // Store the token in localStorage or sessionStorage based on your preference
         localStorage.setItem('userToken', response.data.token);
-        navigate('/');  // Redirect to the home page
+        console.log("Storing username:", username);
+        localStorage.setItem('username', username);
+        navigate(from);  // Redirect to the home page
       } else {
         setError('Login failed. Please check your credentials.');
       }

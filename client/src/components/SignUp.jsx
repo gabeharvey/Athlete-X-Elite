@@ -80,11 +80,12 @@ function SignUp() {
   
       console.log('Backend response:', response.data); // Log the response
   
-      const { token, message } = response.data;
+      const { token, message, username } = response.data;
   
       // Check if the signup was successful
       if (message === 'User created successfully') {
         login(token); // Store token in AuthContext (or localStorage/sessionStorage)
+        localStorage.setItem('username', username);
         resetFormData(); // Clear form fields
         setIsRegistered(true);  // Set registration success to true
   
