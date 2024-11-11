@@ -1,14 +1,14 @@
 import { Box, Text, Button, VStack, Input, FormControl, FormLabel, Link } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
-import axios from 'axios'; 
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function LogIn() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null); 
-  const navigate = useNavigate(); 
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -19,19 +19,25 @@ function LogIn() {
     }
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/login`, 
-        { email: username, password }, 
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/login`,
+        { email: username, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
+
+      console.log(response.data);
+
       if (response.data.token) {
-        localStorage.setItem('userToken', response.data.token);  
-        navigate('/');  
+        // Store the token in localStorage
+        localStorage.setItem('userToken', response.data.token);
+        navigate('/');  // Redirect to the home page
       } else {
         setError('Login failed. Please check your credentials.');
       }
     } catch (error) {
       console.error('Error logging in:', error);
 
+      // Handle error response
       if (error.response && error.response.data) {
         setError(error.response.data.message || 'An error occurred. Please try again.');
       } else {
@@ -82,7 +88,7 @@ function LogIn() {
           </FormLabel>
           <Input
             fontFamily="'Changa', cursive"
-            type="text" 
+            type="text"
             placeholder="Enter your username"
             bg="transparent"
             color="white"
@@ -91,8 +97,8 @@ function LogIn() {
             _focus={{ borderColor: '#FFA500', boxShadow: '0 0 5px #FFA500' }}
             borderRadius="8px"
             p={4}
-            value={username} 
-            onChange={(e) => setUsername(e.target.value)} 
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </FormControl>
 
@@ -111,8 +117,8 @@ function LogIn() {
             _focus={{ borderColor: '#FFA500', boxShadow: '0 0 5px #FFA500' }}
             borderRadius="8px"
             p={4}
-            value={password} 
-            onChange={(e) => setPassword(e.target.value)} 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </FormControl>
 
@@ -133,7 +139,7 @@ function LogIn() {
             color: 'white',
             transform: 'scale(1.05)',
           }}
-          onClick={handleLogin} 
+          onClick={handleLogin}
         >
           Log In
         </Button>
