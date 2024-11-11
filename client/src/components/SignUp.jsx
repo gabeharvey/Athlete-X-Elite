@@ -162,12 +162,36 @@ function SignUp() {
         </Text>
 
         {error && (
-          <Alert status="error" mt={4}>
-            <AlertIcon />
+          <Alert 
+            status="error" 
+            mt={4} 
+            bg="#2C2C2C" 
+            color="#FFFDD0" 
+            borderRadius="8px" 
+            boxShadow="0 0 10px rgba(0, 0, 0, 0.7)"
+            border="1px solid #FFA500" 
+            fontFamily="'Changa', cursive"
+          >
+            <AlertIcon color="#FFA500" /> 
             {error}
           </Alert>
         )}
 
+        {!error && formData.username && formData.email && formData.password && (
+          <Alert 
+            status="success" 
+            mt={4} 
+            bg="#2C2C2C" 
+            color="#FFFDD0" 
+            borderRadius="8px" 
+            boxShadow="0 0 10px rgba(0, 0, 0, 0.7)"
+            border="1px solid #FFA500" 
+          >
+            <AlertIcon color="#FFA500" />
+            User registered successfully!
+          </Alert>
+        )}
+        
         <form onSubmit={handleSignup}>
           <FormControl mt={6}>
             <FormLabel color="#FFFDD0" fontFamily="'Changa', cursive">Username</FormLabel>
