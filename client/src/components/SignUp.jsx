@@ -17,6 +17,7 @@ function SignUp() {
   const navigate = useNavigate();
   const toast = useToast();
 
+  // Handle input field changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -25,50 +26,67 @@ function SignUp() {
     }));
   };
 
+  // Form validation logic
   const validateForm = () => {
     const { username, email, password } = formData;
+
+    // Check for empty fields
     if (!username || !email || !password) {
       setError('Please fill in all fields.');
       return false;
     }
+
+    // Check for valid email format
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     if (!isValidEmail) {
-      setError('Please enter a valid email.');
+      setError('Please enter a valid email address.');
       return false;
     }
+
+    // Check password length and complexity
     if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError('Password must be at least 8 characters long.');
       return false;
     }
-    // Optional: Add a more complex password validation
+    
     const passwordRegex = /^(?=.*[A-Za-z\d])[A-Za-z\d]{8,}$/;
     if (!passwordRegex.test(password)) {
       setError('Password must include at least one letter, one number, and one special character.');
       return false;
     }
+
     setError(null);
     return true;
   };
 
+  // Handle form submission
   const handleSignup = async (e) => {
     e.preventDefault();
-
-    if (!validateForm()) return;
-
-    console.log('Form Data:', formData); // Check form data
-
+  
+    // Validate form data before submitting
+    if (!validateForm()) {
+      console.log('Form validation failed');
+      return;
+    }
+  
     try {
-      const response = await axios.post(`${API_URL}/api/signup`, formData);
+      console.log('Form Data:', formData); // Log form data being sent
+      const response = await axios.post(`${API_URL}/api/signup`, formData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      console.log('Backend response:', response.data); // Log the response
+  
       const { token, message } = response.data;
-
+  
+      // Check if the signup was successful
       if (message === 'User created successfully') {
-        login(token);
-        setFormData({
-          username: '',
-          email: '',
-          password: ''
-        });
-
+        login(token); // Store token in AuthContext (or localStorage/sessionStorage)
+        resetFormData(); // Clear form fields
+  
+        // Show success toast
         toast({
           title: 'Account created.',
           description: 'You have successfully signed up.',
@@ -76,22 +94,37 @@ function SignUp() {
           duration: 5000,
           isClosable: true,
         });
-
+  
+        // Redirect user to home page
+        console.log('Navigating to home page');
         navigate('/');
       } else {
         setError(message || 'Signup failed');
       }
     } catch (error) {
-      console.error('Signup error:', error);
-      setError(error.response?.data?.message || 'Error signing up');
+      console.log('Full error:', error); // Log full error for debugging
+      const errorMessage =
+        error.response?.data?.message || 'An error occurred during signup.';
+      setError(errorMessage);
+  
+      // Show error toast
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'An error occurred during signup.',
+        description: errorMessage,
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
     }
+  };  
+
+  // Reset form data
+  const resetFormData = () => {
+    setFormData({
+      username: '',
+      email: '',
+      password: '',
+    });
   };
 
   return (
@@ -209,6 +242,7 @@ function SignUp() {
             }}
             width="100%"
             type="submit"
+            isLoading={false}  // Add isLoading for visual feedback if needed
           >
             Sign Up
           </Button>

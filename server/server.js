@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import bodyParser from 'body-parser';
 import User from './models/User.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,6 +9,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Stripe from 'stripe';
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
@@ -20,14 +20,15 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Allowed origins for CORS
 const allowedOrigins = [
   'http://localhost:5173',
   'https://athletexelite.onrender.com',
 ];
 
+// CORS options
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+  origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -36,72 +37,81 @@ const corsOptions = {
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Content-Length', 'X-Content-Type-Options'], 
+  exposedHeaders: ['Content-Length', 'X-Content-Type-Options'],
   credentials: true,
 };
 
+// Middleware setup
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use(bodyParser.json());
 
-// Serve static files from the React app (located in client/build)
-app.use(express.static(path.join(__dirname, 'client', 'build'), {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.js')) {
-      res.set('Content-Type', 'application/javascript');
-    } else if (path.endsWith('.css')) {
-      res.set('Content-Type', 'text/css');
-    }
-  }
-}));
-
-// Mongoose connection
+// MongoDB connection with error handling
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/athlete-x-elite', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
   .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1); // Exit the server if MongoDB connection fails
+  });
 
-// Authentication middleware
+// Authentication middleware for protected routes
 const authenticateJWT = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
+  const token = req.headers['authorization']?.split(' ')[1];  // Get token from Authorization header
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ message: 'Invalid token' });
+    if (err) {
+      return res.status(403).json({ message: 'Invalid token' });
+    }
     req.user = user;
     next();
   });
 };
 
+// Routes
+app.get('/', (req, res) => {
+  res.send('Server is working');
+});
+
 // API routes
+
+// User signup route
 app.post('/api/signup', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  // Input validation
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+
   try {
-    const { username, email, password } = req.body;
-
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already in use.' });
     }
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    // Create the user
+    const user = new User({ username, email, password });
+    await user.save();
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword });
-    await newUser.save();
+    // Generate JWT token (optional)
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h'
+    });
 
-    const token = jwt.sign({ id: newUser._id, email: newUser.email }, JWT_SECRET, { expiresIn: '1h' });
-
-    res.status(201).json({ message: 'User created successfully', token });
+    res.status(201).json({ token, message: 'User registered successfully!' });
   } catch (error) {
-    console.error('Error signing up user:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Error signing up user.' });
   }
 });
 
+// User login route
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -120,15 +130,16 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Generate JWT token
     const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login successful', token });
   } catch (error) {
     console.error('Error logging in:', error);
-    res.status(500).json({ message: 'Error logging in', error: error.message });
+    res.status(500).json({ message: 'Error logging in' });
   }
 });
 
-// Handle token verification
+// Token verification route
 app.post('/api/verify-token', (req, res) => {
   const { token } = req.body;
   if (!token) {
@@ -148,12 +159,12 @@ app.post('/api/verify-token', (req, res) => {
   }
 });
 
-// Example protected route
+// Example of a protected route
 app.get('/api/protected', authenticateJWT, (req, res) => {
   res.status(200).json({ message: 'This is a protected route', user: req.user });
 });
 
-// Serve the index.html file for all non-API routes
+// Catch-all for all non-API routes (for React app)
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', 'client', 'build', 'index.html'));
 });
@@ -163,8 +174,19 @@ app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'client'
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error stack:', err.stack);
   res.status(500).send('Something went wrong!');
+});
+
+// Global uncaught exception and unhandled rejection handling
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1); // Exit the process with failure
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  process.exit(1); // Exit the process with failure
 });
 
 // Start the server
