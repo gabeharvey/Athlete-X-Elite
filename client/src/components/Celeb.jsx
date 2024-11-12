@@ -14,7 +14,7 @@ function Celeb() {
       mb="400px"
     >
       <Text fontSize="3xl" color="#FFFDD0" fontFamily="'Changa', cursive" textAlign="center">
-        Endorsed by and partnered with professional stars!
+        <span className="tilt-prism">Athlete X Elite</span> is endorsed by and partnered with professional stars!
       </Text>
 
       <Stack
@@ -51,7 +51,7 @@ function Celeb() {
             "Athlete X Elite truly understands how to highlight an athlete's journey. Their attention to specific skills and ability to showcase them gives college recruiters the information they need very quickly. This holds true for sports across the spectrum for young aspiring athletes."
           </Text>
           <Text fontSize="lg" fontWeight="bold" color="#FFFDD0" fontFamily="'Changa', cursive">
-            - Wane McGarity, University of Texas All-American, Dallas Cowboys and New Orleans Saints legend
+            - Wane McGarity, holder of several school records football University of Texas, Dallas Cowboys star!
           </Text>
         </Box>
       </Stack>
